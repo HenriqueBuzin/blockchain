@@ -65,7 +65,7 @@ class Blockchain:
                                   'receiver': receiver,
                                   'amount': amount
                                  })
-        previous_block = self.get_previous_block
+        previous_block = self.get_previous_block()
         return previous_block['index'] + 1
 
     def add_node(self, address):
@@ -144,7 +144,7 @@ def add_transaction():
 def connect_node():
     json = request.get_json()
     nodes = json.get('nodes')
-    if nodes is Nonde:
+    if nodes is None:
         return 'Vazio', 400
     for node in nodes:
         blockchain.add_node(node)
