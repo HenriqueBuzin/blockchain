@@ -61,10 +61,10 @@ class Blockchain:
 
     def add_transaction(self, sender, receiver, amount):
         self.transactions.append({
-                                    'sender': sender,
-                                    'receiver': receiver,
-                                    'amount': amount
-                                })
+                                  'sender': sender,
+                                  'receiver': receiver,
+                                  'amount': amount
+                                 })
         previous_block = self.get_previous_block
         return previous_block['index'] + 1
 
@@ -129,5 +129,44 @@ def is_valid():
     else:
         response = {'message': 'o blockchain não é válido'}
     return jsonify(response), 200
+
+@app.route('/add_transaction', methods = ['POST'])
+def add_transaction():
+    json = request.get_json()
+    transaction_keys = ['sender', 'receiver', 'amount']
+    if not all(key in json for key in transaction_keys):
+        return 'Alguns elementos estão faltando', 400
+    index = blockchain.add_transaction(json['sender'], json['receiver'], json['amount'])
+    response = {'message': f'Esta transação será adicionada ao bloco {index}'}
+    return jsonify(response), 201
+
+@app.route('/connect_node', methods = ['POST'])
+def connect_node():
+    json = request.get_json()
+    nodes = json.get('nodes')
+    if nodes is Nonde:
+        return 'Vazio', 400
+    for node in nodes:
+        blockchain.add_node(node)
+    response = {
+                'message': 'Todos nós conectados, blockchain contém os seguintes nós:',
+                'total_nodes': list(blockchain.nodes)
+               }
+    return jsonify(response), 201
+
+@app.route('/replace_chain', methods = ['GET'])
+def replace_chain():
+    is_chain_replaced = blockchain.replace_chain()
+    if is_chain_replaced:
+        response = {
+                    'message':'Os nós tinham cadeias diferentes, então foram substituídos',
+                    'new_chain': blockchain.chain
+                   }
+    else:
+        response = {
+                    'message':'Tudo certo, não houve substituição',
+                    'actual_chain': blockchain.chain
+                   }
+    return jsonify(response), 201
 
 app.run(host = '0.0.0.0', port = 5000)
